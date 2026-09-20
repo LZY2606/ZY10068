@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pair-wise GSB 层序图工作台</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>Pair-wise GSB</h1>
+    <p>本地层序、切割/封闭关系与测年区间推理</p>
+  </div>
+  <div class="rule" id="ruleVersion">规则版本加载中</div>
+</header>
+<main>
+  <section class="panel controls">
+    <label>分支
+      <select id="branchSelect"></select>
+    </label>
+    <button id="refreshBtn">刷新</button>
+    <button id="exportBtn">稳定导出</button>
+    <button id="compareBtn">比较分支</button>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>输入</h2>
+      <details open>
+        <summary>建立 context</summary>
+        <form id="contextForm">
+          <input name="id" placeholder="ID，如 L3" required>
+          <input name="label" placeholder="名称" required>
+          <input name="kind" placeholder="类型，如 layer / cut">
+          <input name="note" placeholder="说明">
+          <button>提交 Context</button>
+        </form>
+      </details>
+      <details>
+        <summary>测年区间（有符号天文年）</summary>
+        <form id="datingForm">
+          <input name="id" placeholder="证据 ID" required>
+          <input name="evidenceKey" placeholder="出版证据键（相同来源复用）">
+          <select name="contextId" id="datingContext" required></select>
+          <div class="row">
+            <select name="lowerEra"><option value="ce">CE/AD</option><option value="bce">BCE/BC</option></select>
+            <input name="lowerYear" type="number" placeholder="下界年">
+            <label><input type="checkbox" name="lowerOpen"> 开</label>
+          </div>
+          <div class="row">
+            <select name="upperEra"><option value="ce">CE/AD</option><option value="bce">BCE/BC</option></select>
+            <input name="upperYear" type="number" placeholder="上界年">
+            <label><input type="checkbox" name="upperOpen"> 开</label>
+          </div>
+          <input name="source" placeholder="来源" required>
+          <input name="pages" placeholder="页码，如 42-44">
+          <select name="strength"><option>weak</option><option selected>normal</option><option>strong</option></select>
+          <textarea name="note" placeholder="证据说明"></textarea>
+          <button>提交测年</button>
+        </form>
+      </details>
+      <details>
+        <summary>关系证据</summary>
+        <form id="relationForm">
+          <input name="id" placeholder="证据 ID" required>
+          <input name="evidenceKey" placeholder="出版证据键（可在分支中给不同解释）">
+          <select name="fromContextId" id="relationFrom" required></select>
+          <select name="relation"><option value="earlier-than">earlier-than</option><option value="contemporaneous">contemporaneous</option></select>
+          <select name="toContextId" id="relationTo" required></select>
+          <input name="source" placeholder="来源" required>
+          <input name="pages" placeholder="页码">
+          <select name="strength"><option>weak</option><option selected>normal</option><option>strong</option></select>
+          <textarea name="note" placeholder="切割/封闭等地层关系说明"></textarea>
+          <button>提交关系</button>
+        </form>
+      </details>
+      <details>
+        <summary>撤回单条证据</summary>
+        <form id="retractForm">
+          <input name="evidenceId" placeholder="证据 ID" required>
+          <select name="kind"><option value="relation">关系</option><option value="dating">测年</option></select>
+          <input name="reason" placeholder="撤回理由">
+          <button>撤回</button>
+        </form>
+      </details>
+    </section>
+
+    <section class="panel">
+      <h2>结论</h2>
+      <div id="status"></div>
+      <h3>稳定拓扑序</h3>
+      <ol id="topology"></ol>
+      <h3>允许年代区间</h3>
+      <div id="intervals"></div>
+      <h3>关系（直接/传递）</h3>
+      <div id="relations"></div>
+    </section>
+
+    <section class="panel">
+      <h2>假设与冻结</h2>
+      <details open>
+        <summary>创建工作分支</summary>
+        <form id="branchForm">
+          <input name="id" placeholder="分支 ID" required>
+          <input name="name" placeholder="分支名称" required>
+          <input name="sourceSnapshotId" placeholder="来源快照 ID（可空）">
+          <button>创建分支</button>
+        </form>
+      </details>
+      <details>
+        <summary>冻结已确认快照</summary>
+        <form id="snapshotForm">
+          <input name="id" placeholder="快照 ID" required>
+          <input name="name" placeholder="快照名称" required>
+          <input name="note" placeholder="出版/校准确认说明">
+          <button>冻结快照</button>
+        </form>
+      </details>
+      <details>
+        <summary>预览/执行合并</summary>
+        <form id="mergeForm">
+          <input name="sourceBranchId" placeholder="来源分支" required>
+          <input name="targetBranchId" value="main" required>
+          <input name="reason" placeholder="人工选择理由">
+          <button name="action" value="preview">预览冲突</button>
+          <button name="action" value="merge">执行合并</button>
+        </form>
+        <div id="mergeResult"></div>
+      </details>
+      <div id="snapshots"></div>
+    </section>
+
+    <section class="panel wide">
+      <h2>证据、规则与事件溯源</h2>
+      <div class="tabs">
+        <button data-tab="evidenceTab" class="active">证据</button>
+        <button data-tab="compareTab">跨分支共同结论</button>
+        <button data-tab="eventsTab">事件顺序</button>
+        <button data-tab="exportTab">导出摘要</button>
+      </div>
+      <pre id="evidenceTab" class="tabContent"></pre>
+      <pre id="compareTab" class="tabContent hidden"></pre>
+      <pre id="eventsTab" class="tabContent hidden"></pre>
+      <pre id="exportTab" class="tabContent hidden"></pre>
+    </section>
+  </div>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>
