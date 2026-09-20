@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>层序证据工作台</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>层序证据工作台</h1>
+    <p>偏序约束、年代区间、假设分支与冻结快照</p>
+  </div>
+  <div class="actions">
+    <button id="refresh">刷新</button>
+    <button id="exportBtn">稳定导出</button>
+  </div>
+</header>
+<main>
+  <section class="panel branch-panel">
+    <h2>分支</h2>
+    <div id="branches"></div>
+    <form id="branchForm" class="gridform">
+      <input name="name" placeholder="新假设分支名称">
+      <button>从当前主线创建分支</button>
+    </form>
+    <div class="actions wrap">
+      <button id="publishBtn">冻结发布当前分支</button>
+      <button id="mergeBtn">合并到主线</button>
+      <button id="jobBtn">后台重算（幂等）</button>
+      <button id="compareBtn">比较所有分支</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>新增证据（一次原子提交）</h2>
+    <div class="tabs">
+      <button data-tab="context" class="active">Context</button>
+      <button data-tab="evidence">关系证据</button>
+      <button data-tab="dating">测年区间</button>
+    </div>
+    <form id="contextForm" class="tab gridform">
+      <input name="id" placeholder="context id，如 C100" required>
+      <input name="label" placeholder="标签">
+      <input name="description" placeholder="描述">
+      <button>加入 Context</button>
+    </form>
+    <form id="evidenceForm" class="tab hidden gridform">
+      <input name="source" placeholder="source context" required>
+      <select name="relation"><option>earlier-than</option><option>later-than</option><option>cuts</option><option>cut-by</option><option>seals</option><option>sealed-by</option><option>contemporaneous</option></select>
+      <input name="target" placeholder="target context" required>
+      <input name="strength" type="number" min="1" max="5" value="3">
+      <input name="sourceReference" placeholder="来源">
+      <input name="page" placeholder="页码">
+      <input name="note" placeholder="证据说明">
+      <button>加入证据</button>
+    </form>
+    <form id="datingForm" class="tab hidden gridform">
+      <input name="context" placeholder="context id" required>
+      <select name="lowerEra"><option value="BCE">BCE</option><option value="CE">CE</option></select>
+      <input name="lower" type="number" placeholder="下界绝对值" required>
+      <label><input type="checkbox" name="lowerOpen"> 下界开放</label>
+      <select name="upperEra"><option value="BCE">BCE</option><option value="CE" selected>CE</option></select>
+      <input name="upper" type="number" placeholder="上界绝对值" required>
+      <label><input type="checkbox" name="upperOpen"> 上界开放</label>
+      <input name="sourceReference" placeholder="来源">
+      <input name="page" placeholder="页码">
+      <button>加入测年</button>
+    </form>
+    <p class="hint">整数坐标由 BCE/CE 显式转换；不存在零年。多条同端点证据独立保留，撤回必须指定具体证据 ID。</p>
+  </section>
+
+  <section class="panel wide">
+    <h2>最终结论</h2>
+    <pre id="conclusion" class="output"></pre>
+  </section>
+
+  <section class="panel wide">
+    <h2>输入、规则版本、事件顺序</h2>
+    <details open><summary>当前输入与直接/传递边</summary><pre id="inputs" class="output"></pre></details>
+    <details><summary>审计轨迹</summary><pre id="audit" class="output"></pre></details>
+  </section>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

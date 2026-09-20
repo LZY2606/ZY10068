@@ -1,0 +1,28 @@
+plugins {
+    id 'application'
+}
+
+group = 'local.gsb'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+application {
+    mainClass = 'gsb.Main'
+}
+
+tasks.named('test') {
+    dependsOn tasks.named('compileTestJava')
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    doLast {
+        javaexec {
+            classpath = sourceSets.test.runtimeClasspath
+            mainClass = 'gsb.TestRunner'
+        }
+    }
+}
